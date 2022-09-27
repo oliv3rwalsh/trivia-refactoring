@@ -2,29 +2,51 @@ package com.adaptionsoft.games.uglytrivia;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 
 public class Game {
-    ArrayList players = new ArrayList();
-    int[] places = new int[6];
-    int[] purses  = new int[6];
-    boolean[] inPenaltyBox  = new boolean[6];
-    
-    LinkedList popQuestions = new LinkedList();
-    LinkedList scienceQuestions = new LinkedList();
-    LinkedList sportsQuestions = new LinkedList();
-    LinkedList rockQuestions = new LinkedList();
-    
-    int currentPlayer = 0;
-    boolean isGettingOutOfPenaltyBox;
-    
-    public  Game(){
-    	for (int i = 0; i < 50; i++) {
+	ArrayList players = new ArrayList();
+	int[] places = new int[6];
+	int[] purses  = new int[6];
+	boolean[] inPenaltyBox  = new boolean[6];
+	
+	LinkedList popQuestions = new LinkedList();
+	LinkedList scienceQuestions = new LinkedList();
+	LinkedList sportsQuestions = new LinkedList();
+	LinkedList rockQuestions = new LinkedList();
+	
+	int currentPlayer = 0;
+	boolean isGettingOutOfPenaltyBox;
+
+	boolean firstRun = true;
+
+	public void WriteToFile(String line){
+		try {
+			File outputFile = new File("/Users/oliverwalsh/git/trivia-refactoring/java/src/main/java/com/adaptionsoft/games/uglytrivia/testoutput.txt");
+			if(firstRun){
+				FileWriter outWriter = new FileWriter(outputFile, false);
+				outWriter.write("");
+				outWriter.close();
+				firstRun = false;
+			}
+			FileWriter outWriter = new FileWriter(outputFile, true);
+			outWriter.write(line + "\n");
+			outWriter.close();
+		} catch (IOException e){
+			System.out.println(e);
+		}
+	}
+
+	public  Game(){
+		for (int i = 0; i < 50; i++) {
 			popQuestions.addLast("Pop Question " + i);
 			scienceQuestions.addLast(("Science Question " + i));
 			sportsQuestions.addLast(("Sports Question " + i));
 			rockQuestions.addLast(createRockQuestion(i));
-    	}
-    }
+		}
+	}
 
 	public String createRockQuestion(int index){
 		return "Rock Question " + index;
@@ -37,13 +59,13 @@ public class Game {
 	public boolean add(String playerName) {
 		
 		
-	    players.add(playerName);
-	    places[howManyPlayers()] = 0;
-	    purses[howManyPlayers()] = 0;
-	    inPenaltyBox[howManyPlayers()] = false;
-	    
-	    System.out.println(playerName + " was added");
-	    System.out.println("They are player number " + players.size());
+		players.add(playerName);
+		places[howManyPlayers()] = 0;
+		purses[howManyPlayers()] = 0;
+		inPenaltyBox[howManyPlayers()] = false;
+		
+		WriteToFile(playerName + " was added");
+		WriteToFile("They are player number " + players.size());
 		return true;
 	}
 	
@@ -52,24 +74,24 @@ public class Game {
 	}
 
 	public void roll(int roll) {
-		System.out.println(players.get(currentPlayer) + " is the current player");
-		System.out.println("They have rolled a " + roll);
+		WriteToFile(players.get(currentPlayer) + " is the current player");
+		WriteToFile("They have rolled a " + roll);
 		
 		if (inPenaltyBox[currentPlayer]) {
 			if (roll % 2 != 0) {
 				isGettingOutOfPenaltyBox = true;
 				
-				System.out.println(players.get(currentPlayer) + " is getting out of the penalty box");
+				WriteToFile(players.get(currentPlayer) + " is getting out of the penalty box");
 				places[currentPlayer] = places[currentPlayer] + roll;
 				if (places[currentPlayer] > 11) places[currentPlayer] = places[currentPlayer] - 12;
 				
-				System.out.println(players.get(currentPlayer) 
+				WriteToFile(players.get(currentPlayer) 
 						+ "'s new location is " 
 						+ places[currentPlayer]);
-				System.out.println("The category is " + currentCategory());
+				WriteToFile("The category is " + currentCategory());
 				askQuestion();
 			} else {
-				System.out.println(players.get(currentPlayer) + " is not getting out of the penalty box");
+				WriteToFile(players.get(currentPlayer) + " is not getting out of the penalty box");
 				isGettingOutOfPenaltyBox = false;
 				}
 			
@@ -78,10 +100,10 @@ public class Game {
 			places[currentPlayer] = places[currentPlayer] + roll;
 			if (places[currentPlayer] > 11) places[currentPlayer] = places[currentPlayer] - 12;
 			
-			System.out.println(players.get(currentPlayer) 
+			WriteToFile(players.get(currentPlayer) 
 					+ "'s new location is " 
 					+ places[currentPlayer]);
-			System.out.println("The category is " + currentCategory());
+			WriteToFile("The category is " + currentCategory());
 			askQuestion();
 		}
 		
@@ -89,13 +111,13 @@ public class Game {
 
 	private void askQuestion() {
 		if (currentCategory() == "Pop")
-			System.out.println(popQuestions.removeFirst());
+			WriteToFile(popQuestions.removeFirst().toString());
 		if (currentCategory() == "Science")
-			System.out.println(scienceQuestions.removeFirst());
+			WriteToFile(scienceQuestions.removeFirst().toString());
 		if (currentCategory() == "Sports")
-			System.out.println(sportsQuestions.removeFirst());
+			WriteToFile(sportsQuestions.removeFirst().toString());
 		if (currentCategory() == "Rock")
-			System.out.println(rockQuestions.removeFirst());		
+			WriteToFile(rockQuestions.removeFirst().toString());		
 	}
 	
 	
@@ -115,9 +137,9 @@ public class Game {
 	public boolean wasCorrectlyAnswered() {
 		if (inPenaltyBox[currentPlayer]){
 			if (isGettingOutOfPenaltyBox) {
-				System.out.println("Answer was correct!!!!");
+				WriteToFile("Answer was correct!!!!");
 				purses[currentPlayer]++;
-				System.out.println(players.get(currentPlayer) 
+				WriteToFile(players.get(currentPlayer) 
 						+ " now has "
 						+ purses[currentPlayer]
 						+ " Gold Coins.");
@@ -137,9 +159,9 @@ public class Game {
 			
 		} else {
 		
-			System.out.println("Answer was corrent!!!!");
+			WriteToFile("Answer was corrent!!!!");
 			purses[currentPlayer]++;
-			System.out.println(players.get(currentPlayer) 
+			WriteToFile(players.get(currentPlayer) 
 					+ " now has "
 					+ purses[currentPlayer]
 					+ " Gold Coins.");
@@ -153,8 +175,8 @@ public class Game {
 	}
 	
 	public boolean wrongAnswer(){
-		System.out.println("Question was incorrectly answered");
-		System.out.println(players.get(currentPlayer)+ " was sent to the penalty box");
+		WriteToFile("Question was incorrectly answered");
+		WriteToFile(players.get(currentPlayer)+ " was sent to the penalty box");
 		inPenaltyBox[currentPlayer] = true;
 		
 		currentPlayer++;
@@ -166,4 +188,5 @@ public class Game {
 	private boolean didPlayerWin() {
 		return !(purses[currentPlayer] == 6);
 	}
+
 }
