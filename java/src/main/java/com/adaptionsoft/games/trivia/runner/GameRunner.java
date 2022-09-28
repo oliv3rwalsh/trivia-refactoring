@@ -17,6 +17,7 @@ public class GameRunner {
 		aGame.add("Sue");
 		
 		Random rand = new Random();
+		rand.setSeed(1);
 	
 		do {
 			
