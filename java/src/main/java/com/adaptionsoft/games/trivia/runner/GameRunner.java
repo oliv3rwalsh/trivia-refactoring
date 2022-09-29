@@ -35,3 +35,5 @@ public class GameRunner {
 		
 	}
 }
+
+// diff -rq uglytrivia/correctoutput.txt uglytrivia/testoutput.txt

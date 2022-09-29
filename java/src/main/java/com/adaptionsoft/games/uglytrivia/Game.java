@@ -38,73 +38,56 @@ public class Game {
 			System.out.println(e);
 		}
 	}
-
+// actual code below this line
 	public  Game(){
 		for (int i = 0; i < 50; i++) {
 			popQuestions.addLast("Pop Question " + i);
 			scienceQuestions.addLast(("Science Question " + i));
 			sportsQuestions.addLast(("Sports Question " + i));
-			rockQuestions.addLast(createRockQuestion(i));
+			rockQuestions.addLast(("Rock Question " + i));
 		}
 	}
 
-	public String createRockQuestion(int index){
-		return "Rock Question " + index;
-	}
-	
-	public boolean isPlayable() {
-		return (howManyPlayers() >= 2);
-	}
-
 	public boolean add(String playerName) {
-		
-		
 		players.add(playerName);
-		places[howManyPlayers()] = 0;
-		purses[howManyPlayers()] = 0;
-		inPenaltyBox[howManyPlayers()] = false;
+		int playerNumber = players.size();
+		places[playerNumber] = 0;
+		purses[playerNumber] = 0;
+		inPenaltyBox[playerNumber] = false;
 		
-		WriteToFile(playerName + " was added");
-		WriteToFile("They are player number " + players.size());
+		WriteToFile(playerName + " was added\nThey are player number " + playerNumber);
 		return true;
 	}
-	
-	public int howManyPlayers() {
-		return players.size();
+
+	public void isValidRoll(int roll){
+		places[currentPlayer] = places[currentPlayer] + roll;
+		if (places[currentPlayer] > 11) places[currentPlayer] = places[currentPlayer] - 12;
+	}
+
+	public void showLocationAndCategory(){
+		WriteToFile(players.get(currentPlayer) 
+						+ "'s new location is " 
+						+ places[currentPlayer]);
+		WriteToFile("The category is " + currentCategory());
+		askQuestion();
 	}
 
 	public void roll(int roll) {
 		WriteToFile(players.get(currentPlayer) + " is the current player");
 		WriteToFile("They have rolled a " + roll);
-		
 		if (inPenaltyBox[currentPlayer]) {
 			if (roll % 2 != 0) {
 				isGettingOutOfPenaltyBox = true;
-				
 				WriteToFile(players.get(currentPlayer) + " is getting out of the penalty box");
-				places[currentPlayer] = places[currentPlayer] + roll;
-				if (places[currentPlayer] > 11) places[currentPlayer] = places[currentPlayer] - 12;
-				
-				WriteToFile(players.get(currentPlayer) 
-						+ "'s new location is " 
-						+ places[currentPlayer]);
-				WriteToFile("The category is " + currentCategory());
-				askQuestion();
+				isValidRoll(roll);
+				showLocationAndCategory();
 			} else {
 				WriteToFile(players.get(currentPlayer) + " is not getting out of the penalty box");
 				isGettingOutOfPenaltyBox = false;
-				}
-			
+			}
 		} else {
-		
-			places[currentPlayer] = places[currentPlayer] + roll;
-			if (places[currentPlayer] > 11) places[currentPlayer] = places[currentPlayer] - 12;
-			
-			WriteToFile(players.get(currentPlayer) 
-					+ "'s new location is " 
-					+ places[currentPlayer]);
-			WriteToFile("The category is " + currentCategory());
-			askQuestion();
+			isValidRoll(roll);
+			showLocationAndCategory();
 		}
 		
 	}
@@ -122,54 +105,47 @@ public class Game {
 	
 	
 	private String currentCategory() {
-		if (places[currentPlayer] == 0) return "Pop";
-		if (places[currentPlayer] == 4) return "Pop";
-		if (places[currentPlayer] == 8) return "Pop";
-		if (places[currentPlayer] == 1) return "Science";
-		if (places[currentPlayer] == 5) return "Science";
-		if (places[currentPlayer] == 9) return "Science";
-		if (places[currentPlayer] == 2) return "Sports";
-		if (places[currentPlayer] == 6) return "Sports";
-		if (places[currentPlayer] == 10) return "Sports";
+		if((places[currentPlayer] + 4) % 4 == 0){
+			return "Pop";
+		}
+		if((places[currentPlayer] + 4) % 4 == 1){
+			return "Science";
+		}
+		if((places[currentPlayer] + 4) % 4 == 2){
+			return "Sports";
+		}
 		return "Rock";
 	}
 
+	public void incrementGoldCoins(){
+		purses[currentPlayer]++;
+		WriteToFile(players.get(currentPlayer) 
+				+ " now has "
+				+ purses[currentPlayer]
+				+ " Gold Coins.");
+	}
+
+	public void nextPlayer(){
+		currentPlayer++;
+		if (currentPlayer == players.size()) currentPlayer = 0;
+	}
 	public boolean wasCorrectlyAnswered() {
 		if (inPenaltyBox[currentPlayer]){
 			if (isGettingOutOfPenaltyBox) {
 				WriteToFile("Answer was correct!!!!");
-				purses[currentPlayer]++;
-				WriteToFile(players.get(currentPlayer) 
-						+ " now has "
-						+ purses[currentPlayer]
-						+ " Gold Coins.");
-				
-				boolean winner = didPlayerWin();
-				currentPlayer++;
-				if (currentPlayer == players.size()) currentPlayer = 0;
-				
+				incrementGoldCoins();
+				boolean winner = !(purses[currentPlayer] == 6);
+				nextPlayer();
 				return winner;
 			} else {
-				currentPlayer++;
-				if (currentPlayer == players.size()) currentPlayer = 0;
+				nextPlayer();
 				return true;
 			}
-			
-			
-			
 		} else {
-		
-			WriteToFile("Answer was corrent!!!!");
-			purses[currentPlayer]++;
-			WriteToFile(players.get(currentPlayer) 
-					+ " now has "
-					+ purses[currentPlayer]
-					+ " Gold Coins.");
-			
-			boolean winner = didPlayerWin();
-			currentPlayer++;
-			if (currentPlayer == players.size()) currentPlayer = 0;
-			
+			WriteToFile("Answer was correct!!!!");
+			incrementGoldCoins();
+			boolean winner = !(purses[currentPlayer] == 6);
+			nextPlayer();
 			return winner;
 		}
 	}
@@ -183,10 +159,4 @@ public class Game {
 		if (currentPlayer == players.size()) currentPlayer = 0;
 		return true;
 	}
-
-
-	private boolean didPlayerWin() {
-		return !(purses[currentPlayer] == 6);
-	}
-
 }
